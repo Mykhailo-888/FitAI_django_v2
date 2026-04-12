@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import onboarding
+from . import views
 
 urlpatterns = [
-    path('', onboarding, name='onboarding'),  # ← додай name='onboarding'
+    path('', views.onboarding, name='onboarding'),
+    path('update/', views.update_data, name='update_data'),
+    path('history/', views.history, name='history'),
 ]

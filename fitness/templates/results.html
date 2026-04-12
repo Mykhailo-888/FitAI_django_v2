@@ -1,105 +1,229 @@
 {% extends 'base.html' %}
 
-{% block title %}Результати{% endblock %}
+{% block title %}Your Results - FitAI{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 40px auto; padding: 30px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
 
-    <h1 style="color: #1e40af; text-align: center; margin-bottom: 32px;">Твої результати</h1>
+<style>
+.results-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.impact-title {
+    font-size: 26px;
+    font-weight: 800;
+    text-align: center;
+    margin: 40px 0 15px 0;
+    color: #1e40af;
+}
 
-    <!-- БЛОК ПРИ ВИСОКОМУ СРБ (СРБ > 10) -->
-    {% if high_crp_warning %}
-    <div style="background: #ffebee; padding: 28px; border-radius: 16px; margin-bottom: 40px; border: 3px solid #c62828; color: #b71c1c; text-align: left;">
-        <h2 style="margin: 0 0 16px 0; font-size: 24px; color: #b71c1c;">
-            ⚠️ ТЕРМІНОВО: ДУЖЕ ВИСОКИЙ РІВЕНЬ СРБ (CRP > 10 мг/л)
-        </h2>
+.impact-output {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e40af;
+    text-align: center;
+    margin: 35px 0 20px 0;
+}
 
-        <p style="font-size: 17px; line-height: 1.6; margin: 0 0 20px 0;">
-            {{ high_crp_warning }}
-        </p>
+.impact-row {
+    display: flex;
+    gap: 30px;
+    flex-wrap: nowrap;
+}
 
-        {% if training_restriction %}
-        <p style="font-size: 18px; font-weight: bold; margin: 0 0 16px 0; color: #d32f2f;">
-            {{ training_restriction }}
-        </p>
-        {% endif %}
+.impact-col {
+    width: 50%;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
 
-        <p style="font-size: 16px; line-height: 1.5; margin: 0; background: #ffcdd2; padding: 12px; border-radius: 8px;">
-            <strong>Що робити негайно:</strong><br>
-            1. Звернися до сімейного лікаря або терапевта якомога швидше<br>
-            2. Не починай і не продовжуй тренування<br>
-            3. Уникай інтенсивних фізичних навантажень, сауни, стресу<br>
-            4. Повтори аналіз СРБ + інші маркери запалення (ШОЕ, феритин, лейкоцити тощо)
-        </p>
+.bar {
+    margin-bottom: 20px;
+}
+
+.bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.bar-name {
+    white-space: nowrap;
+}
+
+.bar-percent {
+    font-weight: bold;
+}
+
+.bar-fill {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.bar-fill-inner {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.forecast-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 12px;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.forecast-item span:last-child {
+    white-space: nowrap;
+}
+
+.recommendations {
+    font-size: 17px;
+    line-height: 1.7;
+    background: #f8fafc;
+    padding: 32px;
+    border-radius: 16px;
+}
+
+/* 🔥 MOBILE */
+@media (max-width: 768px) {
+    .impact-row {
+        flex-direction: column;
+    }
+    .impact-col {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="results-container">
+
+<h1 style="color: #1e40af; text-align: center; margin-bottom: 40px; font-size: 36px;">
+    Your Results
+</h1>
+
+{% if model_error %}
+<div style="margin-bottom: 40px; padding: 20px; border-radius: 12px; background:#fef3c7; color:#92400e;">
+    <strong>Попередження:</strong> {{ model_error }}
+</div>
+{% endif %}
+
+<!-- Forecast -->
+<div style="margin-bottom: 50px;">
+    <h2 style="color: #1e40af; text-align: center; margin-bottom: 24px; font-size: 28px;">
+        Forecast for the Next Week
+    </h2>
+
+    <div style="background: #f0f9ff; padding: 32px; border-radius: 16px;">
+        {% for label, unit, value in prediction_with_labels %}
+        <div class="forecast-item">
+            <span style="font-weight:600; color:#1e40af;">{{ label }}</span>
+            <span style="font-weight:bold; color:#2563eb; font-size:20px;">
+                {{ value }} {{ unit }}
+            </span>
+        </div>
+        {% endfor %}
     </div>
+</div>
 
-    <!-- Якщо СРБ > 10 — ховаємо або замінюємо план тренувань -->
-    {% if training_restriction and "заборонені" in training_restriction|lower %}
-    <div style="background: #fff3e0; padding: 24px; border-radius: 12px; margin-bottom: 40px; text-align: center; border: 2px dashed #f57c00;">
-        <h3 style="color: #ef6c00; margin: 0 0 16px 0;">План тренувань тимчасово недоступний</h3>
-        <p style="font-size: 16px; margin: 0; color: #5d4037;">
-            Через дуже високий рівень СРБ тренування протипоказані.<br>
-            Повернися сюди після консультації з лікарем та нормалізації показника.
-        </p>
+<!-- Weekly Plan -->
+<div style="margin-bottom: 50px;">
+    <h2 style="color: #1e40af; text-align: center; margin-bottom: 24px; font-size: 28px;">
+        Your Weekly Training Plan
+    </h2>
+
+    <div style="background: #f0f9ff; padding: 32px; border-radius: 16px; text-align: center;">
+        {% for key, value in weekly_plan.items %}
+        <div style="margin: 12px 0; font-size: 18px;">
+            <strong style="color: #1e40af;">{{ key|title }}</strong>:
+            <span style="font-weight:bold;">{{ value }}</span>
+        </div>
+        {% endfor %}
     </div>
-    {% else %}
-    <!-- Нормальний план тренувань (якщо СРБ ≤ 10) -->
-    <div style="margin-bottom: 40px;">
-        <h2 style="color: #1e40af; margin-bottom: 20px; text-align: center;">Тижневий план тренувань</h2>
-        <div style="background: #f0f9ff; padding: 24px; border-radius: 12px; text-align: left;">
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                {% for key, value in weekly_plan.items %}
-                <li style="margin: 14px 0; font-size: 16px; line-height: 1.5;">
-                    <strong style="color: #1e40af;">{{ key }}</strong>:
-                    <span style="color: #334155;">{{ value }}</span>
-                </li>
+</div>
+
+<!-- Recommendations -->
+<div style="margin-bottom: 50px;">
+    <h2 style="color: #1e40af; text-align: center; margin-bottom: 24px; font-size: 28px;">
+        Personalized Recommendations & Insights
+    </h2>
+
+    <div class="recommendations" style="text-align: center; white-space: pre-line;">
+        {{ recommendations|safe }}
+    </div>
+</div>
+
+<!-- FEATURE IMPACT -->
+<div style="margin-top: 60px;">
+    <h2 class="impact-title">Calculating Feature Impact (PER OUTPUT)</h2>
+
+    {% for item in feature_impact %}
+    <div style="margin-bottom: 60px;">
+        <h3 class="impact-output">{{ item.output }}</h3>
+
+        <div class="impact-row">
+
+            <!-- LEFT -->
+            <div class="impact-col">
+                <p style="font-weight:700; margin-bottom:15px;">Relative (+30%)</p>
+
+                {% for bar in item.relative %}
+                <div class="bar">
+                    <div class="bar-header">
+                        <span class="bar-name">{{ bar.name }}</span>
+                        <span class="bar-percent">{{ bar.value }}%</span>
+                    </div>
+                    <div class="bar-fill">
+                        <div class="bar-fill-inner" style="width:{{ bar.value }}%; background:#22c55e;"></div>
+                    </div>
+                </div>
                 {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
+            </div>
 
-    {% else %}
-    <!-- Якщо СРБ нормальний — показуємо прогноз і план як раніше -->
-    <div style="text-align: center; margin-bottom: 40px;">
-        <h2 style="color: #1e40af; margin-bottom: 16px;">Прогноз покращення</h2>
-        <p style="font-size: 32px; font-weight: bold; color: #3b82f6; margin: 0;">
-            {{ prediction|join:", " }}
-        </p>
-    </div>
+            <!-- RIGHT -->
+            <div class="impact-col">
+                <p style="font-weight:700; margin-bottom:15px;">Gradient-based</p>
 
-    <!-- План тренувань (якщо немає попередження) -->
-    <div style="margin-bottom: 40px;">
-        <h2 style="color: #1e40af; margin-bottom: 20px; text-align: center;">Тижневий план тренувань</h2>
-        <div style="background: #f0f9ff; padding: 24px; border-radius: 12px; text-align: left;">
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                {% for key, value in weekly_plan.items %}
-                <li style="margin: 14px 0; font-size: 16px; line-height: 1.5;">
-                    <strong style="color: #1e40af;">{{ key }}</strong>:
-                    <span style="color: #334155;">{{ value }}</span>
-                </li>
+                {% for bar in item.gradient %}
+                <div class="bar">
+                    <div class="bar-header">
+                        <span class="bar-name">{{ bar.name }}</span>
+                        <span class="bar-percent">{{ bar.value }}%</span>
+                    </div>
+                    <div class="bar-fill">
+                        <div class="bar-fill-inner" style="width:{{ bar.value }}%; background:#f59e0b;"></div>
+                    </div>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
+
         </div>
     </div>
-    {% endif %}
+    {% endfor %}
+</div>
 
-    <!-- Рекомендації завжди показуємо -->
-    {% if recommendations %}
-    <div style="margin-bottom: 40px;">
-        <h2 style="color: #1e40af; margin-bottom: 16px; text-align: center;">Рекомендації</h2>
-        <div style="background: #fffbeb; padding: 24px; border-radius: 12px; text-align: left; white-space: pre-wrap; font-size: 16px; line-height: 1.6;">
-            {{ recommendations }}
-        </div>
-    </div>
-    {% endif %}
+<!-- Buttons -->
+<div style="text-align: center; margin-top: 40px;">
+    <a href="{% url 'onboarding' %}"
+       style="background: #3b82f6; color: white; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-right: 16px;">
+        Update Data
+    </a>
 
-    <div style="text-align: center; margin-top: 32px;">
-        <a href="{% url 'onboarding' %}"
-           style="display: inline-block; background: #3b82f6; color: white; padding: 14px 40px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 17px;">
-            Повернутися та оновити дані
-        </a>
-    </div>
+    <a href="{% url 'history' %}"
+       style="background: #10b981; color: white; padding: 16px 48px; border-radius: 12px; text-decoration: none; font-weight: 600;">
+        View History
+    </a>
+</div>
 
 </div>
+
 {% endblock %}

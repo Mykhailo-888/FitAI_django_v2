@@ -1,0 +1,12 @@
+{
+    "dataset": "edited_23_params_realistic.csv",
+    "train_samples": 778,
+    "val_samples": 195,
+    "n_iters": 20000,
+    "lr": 0.0005,
+    "embedding_size": 48,
+    "hidden_size": 32,
+    "best_val_loss": 0.49017561508444923,
+    "timestamp": "2026-04-11 00:49:04",
+    "notes": "physics-based targets with improved waist logic (more negative waist)"
+}

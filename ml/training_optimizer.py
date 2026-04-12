@@ -17,7 +17,7 @@ def weekly_training_plan_optimizer(
     Оптимізований тижневий план тренувань з урахуванням ризиків та стану.
     """
     # Розрахунок ризиків (приклад — додай свої функції hrv_risk, cardio_risk тощо)
-    hrv_risk_level = "середній" if current_hrv < 50 else "низький"
+    hrv_risk_level = "medium" if current_hrv < 50 else "low"
     cardio_risk_score = 10.0
     if age > 45:
         cardio_risk_score += 6
@@ -56,7 +56,7 @@ def weekly_training_plan_optimizer(
         "recovery_penalty_percent": round(recovery_penalty * 100, 1),
         "cardio_risk_score": cardio_risk_score,
         "hrv_risk": hrv_risk_level,
-        "hiit_recommendation": "Можна робити HIIT" if hiit_count > 0 else "Краще уникати HIIT"
+        "hiit_recommendation": "HIIT is allowed" if hiit_count > 0 else "Better to avoid HIIT"
     }
 
     return plan

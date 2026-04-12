@@ -1,5 +1,6 @@
+# fitness/admin.py
+
 from django.contrib import admin
-from .models import UserData, TrainingPlan  # якщо назви моделей інші — поправ
+from .models import UserData  # тільки UserData
 
 admin.site.register(UserData)
-admin.site.register(TrainingPlan)
