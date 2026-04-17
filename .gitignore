@@ -29,4 +29,4 @@ staticfiles/
 Thumbs.db
 
 # Велика модель
-#models/trained_fitness_model.pkl
+models/trained_fitness_model.pkl
