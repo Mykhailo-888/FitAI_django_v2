@@ -8,14 +8,27 @@ import os
 # BASE
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+# =========================
 # SECURITY
+# =========================
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']  # потім звузимо
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    ".onrender.com",
+    ".railway.app",
+]
 
+
+# =========================
 # APPLICATIONS
+# =========================
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -26,10 +39,14 @@ INSTALLED_APPS = [
     'fitness',
 ]
 
+
+# =========================
 # MIDDLEWARE
+# =========================
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ДОДАНО
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # MUST be right after SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -38,9 +55,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'fitai.urls'
 
+
+# =========================
 # TEMPLATES
+# =========================
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -57,9 +79,14 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'fitai.wsgi.application'
 
-# DATABASE
+
+# =========================
+# DATABASE (DEV = SQLite)
+# =========================
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -67,7 +94,11 @@ DATABASES = {
     }
 }
 
-# PASSWORD VALIDATION
+
+# =========================
+# VALIDATION
+# =========================
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -75,23 +106,52 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+
+# =========================
 # INTERNATIONAL
+# =========================
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# STATIC FILES
-STATIC_URL = 'static/'
+
+# =========================
+# STATIC FILES (PRODUCTION READY)
+# =========================
+
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# MEDIA FILES (фото)
+# Django 4+ compatible WhiteNoise config
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
+# =========================
+# MEDIA FILES
+# =========================
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# UPLOAD LIMITS
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
-# WHITENOISE
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# =========================
+# UPLOAD LIMITS
+# =========================
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5MB
+
+
+# =========================
+# SECURITY HEADERS (PROD SAFETY)
+# =========================
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
