@@ -1,11 +1,9 @@
-"""
-Django settings for fitai project.
-"""
-
 from pathlib import Path
 import os
 
+# =========================
 # BASE
+# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -15,7 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+# 👉 головний перемикач
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -46,7 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # MUST be right after SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ок
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,7 +83,7 @@ WSGI_APPLICATION = 'fitai.wsgi.application'
 
 
 # =========================
-# DATABASE (DEV = SQLite)
+# DATABASE
 # =========================
 
 DATABASES = {
@@ -93,18 +92,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
-# =========================
-# VALIDATION
-# =========================
-
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
 
 
 # =========================
@@ -118,22 +105,24 @@ USE_TZ = True
 
 
 # =========================
-# STATIC FILES (PRODUCTION READY)
+# STATIC FILES
 # =========================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Django 4+ compatible WhiteNoise config
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
 
 # =========================
-# MEDIA FILES
+# MEDIA
 # =========================
 
 MEDIA_URL = '/media/'
@@ -144,14 +133,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # UPLOAD LIMITS
 # =========================
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 
 # =========================
-# SECURITY HEADERS (PROD SAFETY)
+# PRODUCTION SAFE SETTINGS
 # =========================
 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
